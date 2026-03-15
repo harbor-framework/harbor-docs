@@ -13,14 +13,6 @@ To create a task, you can use the following command:
 harbor tasks init "<task-name>"
 ```
 
-You can pass a `--metadata-template` (`-t`) flag with a path to a TOML file to pre-populate `task.toml` with metadata fields and config defaults:
-
-```bash
-harbor tasks init "<task-name>" -t task-template.toml
-```
-
-The template can include a `[metadata]` section (populated as-is) and `[verifier]`, `[agent]`, `[environment]` sections that override Harbor's built-in defaults. Any section not specified in the template uses Harbor defaults (e.g., `verifier.timeout_sec = 600.0`, `environment.cpus = 1`, `environment.memory_mb = 2048`). See the [configuration reference](#configuration--metadata) below for all defaults.
-
 This will create a new task directory with the following structure:
 
 import { File, Folder, Files } from 'fumadocs-ui/components/files';
@@ -66,14 +58,13 @@ An example is shown below:
 version = "1.0"
 
 [metadata]
+difficulty_explanation = "Trivial task for demonstration"
+category = "programming"
+tags = ["trivial"]
 
 [[metadata.authors]]
 name = "Steve Jobs"
 email = "steve@apple.com"
-
-difficulty_explanation = "Trivial task for demonstration"
-category = "programming"
-tags = ["trivial"]
 
 [verifier]
 timeout_sec = 120.0
@@ -205,6 +196,14 @@ import { TypeTable } from 'fumadocs-ui/components/type-table';
     }
   }}
 />
+
+During task creation, you can pass a `--metadata-template` (`-t`) flag with a path to a TOML file to pre-populate `task.toml` with metadata fields and config defaults:
+
+```bash
+harbor tasks init "<task-name>" -t task-template.toml
+```
+
+Sections in the template override Harbor's built-in defaults. Anything not specified falls back to the defaults listed above.
 
 ### Environment
 
