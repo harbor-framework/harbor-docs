@@ -197,10 +197,10 @@ import { TypeTable } from 'fumadocs-ui/components/type-table';
   }}
 />
 
-During task creation, you can pass a `--metadata-template` (`-t`) flag with a path to a TOML file to pre-populate `task.toml` with metadata fields and config defaults:
+During task creation, you can pass a `--metadata-template` flag with a path to a TOML file to pre-populate `task.toml` with metadata fields and config defaults:
 
 ```bash
-harbor tasks init "<task-name>" -t task-template.toml
+harbor tasks init "<task-name>" --metadata-template task-template.toml
 ```
 
 Sections in the template override Harbor's built-in defaults. Anything not specified falls back to the defaults listed above.
