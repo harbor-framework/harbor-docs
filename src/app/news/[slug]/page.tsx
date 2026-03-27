@@ -18,20 +18,19 @@ export default async function NewsPost(
     <main className="mx-auto max-w-2xl px-4 py-12">
       <article>
         <div className="font-mono">
-          <div className="flex items-start justify-between gap-4">
+          <div className="mb-6 flex items-start justify-between gap-4">
             <h1 className="text-3xl font-normal">{page.data.title}</h1>
             <ShareButton />
           </div>
-          <p className="mt-2 text-fd-muted-foreground">
+          <p className="mt-2 text-sm text-fd-muted-foreground">
             {new Date(page.data.date).toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
               day: "numeric",
             })}
-            {page.data.author && ` · ${page.data.author}`}
           </p>
           {page.data.description && (
-            <p className="mt-2 text-sm text-fd-muted-foreground">
+            <p className="mt-4 text-sm text-fd-muted-foreground leading-loose">
               {page.data.description}
             </p>
           )}
@@ -41,6 +40,9 @@ export default async function NewsPost(
             <MDX components={getMDXComponents({})} />
           </DocsBody>
         </div>
+        <p className="mt-8 text-sm text-fd-muted-foreground font-mono">
+          {page.data.author || "Harbor Team"}
+        </p>
       </article>
     </main>
   );

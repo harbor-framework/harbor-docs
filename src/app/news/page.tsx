@@ -37,7 +37,9 @@ export default function NewsPage() {
                   </Badge>
                 </div>
                 {post.data.description && (
-                  <CardDescription>{post.data.description}</CardDescription>
+                  <CardDescription className="leading-relaxed">
+                    {post.data.description}
+                  </CardDescription>
                 )}
               </CardHeader>
             </Card>
