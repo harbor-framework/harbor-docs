@@ -7,6 +7,7 @@
         "run-jobs",
         "tasks",
         "datasets",
+        "sharing",
         "agents",
         "training-workflows",
         "tutorials",

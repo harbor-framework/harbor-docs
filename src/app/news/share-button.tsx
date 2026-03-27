@@ -17,11 +17,11 @@ export function ShareButton() {
   return (
     <Button
       variant="secondary"
-      size="sm"
+      size="lg"
       onClick={handleShare}
-      className="shrink-0"
+      className="shrink-0 h-10 px-4"
     >
-      <Link2 className="size-4" />
+      <Link2 className="size-5" />
       Share
     </Button>
   );

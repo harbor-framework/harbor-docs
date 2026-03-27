@@ -1,0 +1,67 @@
+---
+title: Publishing Tasks
+description: Publish Harbor tasks to the package registry
+---
+
+After building and validating a task, upload it with `harbor publish` to share it with others.
+
+```bash
+harbor publish "<path/to/task-or-task-directory>"
+```
+
+You can publish multiple items in one command:
+
+```bash
+harbor publish "<path/to/task-a>" "<path/to/task-b>"
+```
+
+## Prerequisites
+
+Before publishing, run:
+
+```bash
+harbor auth login
+```
+
+This opens a GitHub sign-in flow and creates your Harbor account. New accounts get an org using your GitHub username by default. You can create other orgs on the registry website later. You must be a member of an org to publish.
+
+Publishing requires an authenticated Harbor user session.
+
+## Useful publish flags
+
+- `-t / --tag`: add custom tags (repeatable). `latest` is always included.
+- `-c / --concurrency`: control upload concurrency (default: 50).
+
+By default, tasks are always published with the `latest` tag.
+
+## Sharing
+
+Publishing visibility and access is documented in [Sharing](/docs/sharing).
+
+## Examples
+
+### Publish one task
+
+```bash
+harbor publish "./tasks/my-task"
+```
+
+### Publish with a release tag
+
+```bash
+harbor publish "./tasks/my-task" -t benchmark-baseline
+```
+
+### Publish several tasks at once
+
+```bash
+harbor publish "./tasks/task-a" "./tasks/task-b"
+```
+
+## What publish does
+
+- Computes and uploads the task archive.
+- Resolves task metadata and task digest from `task.toml`.
+- Registers the version in the Harbor package registry.
+
+The output includes a registry package page link.

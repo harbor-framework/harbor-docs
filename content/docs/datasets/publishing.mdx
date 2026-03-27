@@ -1,0 +1,77 @@
+---
+title: Publishing
+description: Publish task and dataset packages
+---
+
+## Publish tasks and datasets
+
+Use `harbor publish` for local task folders, dataset folders, or mixed inputs:
+
+```bash
+harbor publish "./path/to/task-a" "./path/to/task-b" "my-dataset"
+```
+
+## Prerequisites
+
+Before publishing, run:
+
+```bash
+harbor auth login
+```
+
+This opens a GitHub sign-in flow and creates your Harbor account. New accounts get an org using your GitHub username by default. You can create other orgs on the registry website later. You must be a member of an org to publish.
+
+Publishing requires an authenticated Harbor user session.
+
+### Publish options
+
+- `-t / --tag`: add one or more tags (repeatable). `latest` is always included.
+- `-c / --concurrency`: upload concurrency.
+- `--no-tasks`: for dataset directories, publish only dataset metadata/files.
+
+By default, datasets are published with the `latest` tag.
+
+### Tagging
+
+```bash
+harbor publish "my-dataset" -t v1.0 --public
+harbor publish "my-dataset" --no-tasks -t metadata-only
+```
+
+## Sharing
+
+Publishing visibility and access is documented in [Sharing](/docs/sharing).
+
+## Sync a dataset manifest
+
+Use `harbor sync` for explicit digest refresh of local tasks in the dataset folder and registry task references.
+
+```bash
+harbor sync "<path/to/dataset>"
+```
+
+Options:
+
+- `-u / --upgrade`: pull latest digests from registry for task references
+- `-c / --concurrency`: registry lookup concurrency for `--upgrade`
+
+Common cases:
+
+```bash
+harbor sync "my-dataset"
+harbor sync "my-dataset" --upgrade
+```
+
+For most local-only datasets where tasks live inside the dataset folder, manual sync is usually unnecessary before publish.
+
+Local tasks outside the dataset folder are not auto-refreshed by sync; re-add them to refresh their digests.
+If a task is already present, `harbor add` upgrades it by default.
+
+## Recommended sequence
+
+1. Build with `harbor dataset init` and `harbor add`.
+   Then run `harbor publish "<path/to/dataset>"` (or publish tasks separately).
+
+`harbor publish` already refreshes local task digests during upload.
+
+For dataset composition basics, see [Registering Datasets](/docs/datasets/registering-datasets), and for custom scoring logic, see [Custom Metrics](/docs/datasets/metrics).
