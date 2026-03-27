@@ -34,7 +34,7 @@ harbor run --help
 To view registered datasets, run
 
 ```bash
-harbor datasets list
+harbor dataset list
 ```
 
 ### Running a registered dataset
@@ -42,7 +42,7 @@ harbor datasets list
 To evaluate an agent and model one of these datasets, you can use the following command:
 
 ```bash
-harbor run -d "<dataset@version>" -m "<model>" -a "<agent>"
+harbor run -d "<org/name>" -m "<model>" -a "<agent>"
 ```
 
 Harbor will automatically download registered datasets. 
@@ -60,7 +60,7 @@ harbor run -p "<path/to/dataset>" -m "<model>" -a "<agent>"
 To run using a cloud sandbox provider like Daytona, you can use the following command:
 
 ```bash
-harbor run -d "<dataset@version>" -m "<model>" -a "<agent>" --env "daytona" -n 32
+harbor run -d "<org/name>" -m "<model>" -a "<agent>" --env "daytona" -n 32
 ```
 
 If you run a cloud sandbox using an API model, trials become I/O bounded rather than compute bounded, which means you can typically parallelize far above your CPU count (the example command above runs 32 trials concurrently).

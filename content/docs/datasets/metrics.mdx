@@ -1,93 +1,43 @@
 ---
 title: Metrics
-description: Defining dataset-level metrics for reward aggregation
+description: Built-in and custom metrics for Harbor dataset evaluation
 ---
 
-Most datasets use mean (accuracy) as the metric for reward aggregation. However, certain datasets may choose to use other metrics.
+Harbor aggregates dataset rewards with a metric.
 
-Harbor provides a few common metrics. If you require a custom metric, we currently support implementing a Python script that expects certain flags to be set and is executed using `uv run`.
+## Built-in metrics
 
-## Available metrics
+Harbor ships with:
 
-Harbor provides metrics for `sum`, `min`, `max`, and `mean`.
+- `sum`
+- `min`
+- `max`
+- `mean`
 
-To define a metric for a registered dataset, you can populate `metrics` field in the dataset's `registry.json` object. Datasets can contain multiple metrics.
+## Custom metrics with `metric.py`
 
-Here is an example of a dataset with multiple metrics:
+For package datasets, add custom aggregation via a `metric.py` file in `[[files]]`.
 
-```json title="registry.json"
-{
-    "name": "my-dataset",
-    "version": "1.0",
-    "description": "A description of the dataset",
-    "metrics": [
-        {
-            "type": "mean"
-        },
-        {
-            "type": "max"
-        }
-    ]
-    "tasks": [
-        {
-            "name": "task-1",
-            "git_url": "https://github.com/my-org/my-dataset.git",
-            "git_commit_id": "1234567890",
-            "path": "task-1"
-        },
-        ...
-    ]
-}
-```
-
-## Custom metrics
-
-Currently, custom metrics are only supported locally. Please [raise a GitHub issue](https://github.com/laude-institute/harbor/issues) if you want support for hosted custom metrics.
-
-To implement a custom metric, you will add the following metric to your dataset:
-
-```json title="registry.json"
-...
-        {
-            "type": "uv-script",
-            "kwargs": {
-                "script_path": "my_custom_metric.py"
-            }
-        }
-...
-```
-
-The script itself should expect two flags:
-
-
-
-| Flag        | Description                        |
-|-------------|------------------------------------|
-| `-i`        | Path to a jsonl file containing rewards, one json object per line.   |
-| `-o`        | Path to a json file where the metric will be written as a json object.   |
-
-For example, your script might be run with:
+Create a dataset with a metric template:
 
 ```bash
-uv run my_custom_metric.py -i input.jsonl -o output.json
+harbor dataset init "my-org/my-dataset" --with-metric
 ```
 
-where `input.jsonl` is the trial rewards and `output.json` will contain your computed metric(s). If your script requires dependencies, add them as a comment [using uv's convention](https://docs.astral.sh/uv/guides/scripts/#declaring-script-dependencies).
+The script receives:
 
-Here is an example of a custom metric script:
+- `-i, --input-path`: rewards JSONL file
+- `-o, --output-path`: output JSON file with computed metrics
 
-```python title="custom_mean.py"
+Example:
+
+```python title="metric.py"
 # /// script
-# dependencies = [
-#   "numpy==2.3.4",
-# ]
+# dependencies = []
 # ///
-
 import argparse
 import json
 from pathlib import Path
-
-import numpy as np
 
 
 def main(input_path: Path, output_path: Path):
@@ -97,40 +47,36 @@ def main(input_path: Path, output_path: Path):
         reward = json.loads(line)
         if reward is None:
             rewards.append(0)
-
         elif len(reward) != 1:
-            raise ValueError(
-                f"Expected exactly one key in reward dictionary, got {len(reward)}"
-            )
-
+            raise ValueError(f"Expected one key per reward line, got {len(reward)}")
         else:
             rewards.extend(reward.values())
 
-    result = np.mean(rewards)
-
-    output_path.write_text(json.dumps({"mean": result}))
+    output_path.write_text(json.dumps({"mean": sum(rewards) / len(rewards) if rewards else 0}))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "-i",
-        "--input-path",
-        type=Path,
-        required=True,
-        help="Path to a jsonl file containing rewards, one json object per line.",
-    )
-    parser.add_argument(
-        "-o",
-        "--output-path",
-        type=Path,
-        required=True,
-        help="Path to a json file where the metric will be written as a json object.",
-    )
-
+    parser.add_argument("-i", "--input-path", type=Path, required=True)
+    parser.add_argument("-o", "--output-path", type=Path, required=True)
     args = parser.parse_args()
-
     main(args.input_path, args.output_path)
+```
 
+If you change `metric.py` and use non-local tasks, sync before publish:
+
+```bash
+harbor sync my-dataset
+```
+
+Then publish:
+
+```bash
+harbor publish my-dataset --public
+```
+
+`metric.py` output should be a JSON object. Multiple metric values are allowed:
+
+```json
+{"mean": 0.81, "pass_rate": 0.5}
 ```

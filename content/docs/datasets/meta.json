@@ -1,4 +1,10 @@
 {
     "title": "Datasets",
-    "pages": ["index", "registering-datasets", "adapters", "metrics"]
+    "pages": [
+        "index",
+        "registering-datasets",
+        "publishing",
+        "adapters",
+        "metrics"
+    ]
 }

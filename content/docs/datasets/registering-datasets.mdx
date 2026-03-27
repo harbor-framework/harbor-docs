@@ -1,93 +1,130 @@
 ---
 title: Registering Datasets
-description: How to register your dataset in the Harbor registry
+description: Initialize, assemble, and prepare datasets for Harbor publishing
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
 
-The Harbor registry allows you to share your datasets with the community. Once registered, anyone can run your dataset using the `harbor run -d "your-dataset@version"` command.
+Harbor datasets are `dataset.toml` manifests with task digests.
 
-<Callout title="CLI Coming Soon">
-We have CLI commands coming soon that will drastically simplify the process of hosting and registering datasets. Stay tuned!
+<Callout title="Legacy registry.json note">
+You may still see older examples referring to `registry.json` and external PR-based registration.
+Those are legacy patterns; the CLI package workflow below is the recommended approach for
+creating and publishing datasets today.
 </Callout>
 
-## Registration Steps
+## 1) Initialize a dataset manifest
 
-### 1. Push your tasks to a public git repository
+Initialize the dataset manifest:
 
-Your tasks must be hosted in a publicly accessible git repository. Each task should follow the [Harbor task format](/docs/tasks).
+```bash
+harbor dataset init "my-org/my-dataset" --description "A short description"
+```
 
-Organize your repository with one directory per task:
+If you need a custom metric script:
+
+```bash
+harbor dataset init "my-org/my-dataset" --with-metric
+```
+
+This creates:
 
 ```
 my-dataset/
-├── task-1/
-│   ├── instruction.md
-│   ├── task.toml
-│   ├── environment/
-│   │   └── Dockerfile
-│   ├── solution/
-│   │   └── solve.sh
-│   └── tests/
-│       └── test.sh
-├── task-2/
-│   ├── instruction.md
-│   ├── task.toml
-│   ├── environment/
-│   │   └── Dockerfile
-│   └── tests/
-│       └── test.sh
-└── ...
+├── dataset.toml
+└── metric.py            # only if --with-metric
 ```
 
-Make sure to commit your changes and note the commit hash you want to use for your dataset version.
-
-### 2. Create a registry entry
-
-Add an entry to the [registry.json](https://github.com/laude-institute/harbor/blob/main/registry.json) file with the following structure:
-
-```json
-{
-    "name": "your-dataset-name",
-    "version": "1.0",
-    "description": "A description of what your dataset evaluates",
-    "tasks": [
-        {
-            "name": "task-1",
-            "git_url": "https://github.com/your-org/your-repo.git",
-            "git_commit_id": "abc123...",
-            "path": "task-1"
-        },
-        {
-            "name": "task-2",
-            "git_url": "https://github.com/your-org/your-repo.git",
-            "git_commit_id": "abc123...",
-            "path": "task-2"
-        }
-    ]
-}
-```
-
-### 3. Test your changes locally
-
-Before submitting your PR, test that your registry entry works correctly by pointing to your local registry file:
+If you initialize in the same directory as `dataset.toml`, local tasks are auto-added when the manifest is generated (recommended, not required).
+For example:
 
 ```bash
-harbor run -d "your-dataset-name@1.0" -a "<agent>" -m "<model>" --registry-path ./registry.json
+my-dataset/
+├── dataset.toml
+├── task-a/
+├── task-b/
+└── metric.py            # only if --with-metric
 ```
 
-This ensures your tasks are properly configured and accessible before you submit.
+## 2) Add tasks and files
 
-### 4. Submit a pull request
+Use `harbor add` to explicitly add local, registered, or file-based dataset items.
+Useful when tasks are not auto-added during manifest generation.
 
-Open a pull request to the [Harbor repository](https://github.com/laude-institute/harbor) with your registry.json changes. Include in your PR description:
+```bash
+cd my-dataset
+```
 
-- What the dataset evaluates
-- The number of tasks included
-- Any relevant context about difficulty or domain
+### Add local tasks
 
-Once your PR is reviewed and merged, your dataset will be available to all Harbor users.
+```bash
+harbor add ./task-a ./task-b
+```
 
-## Questions?
+### Add registered tasks or datasets
 
-If you have any questions about registering your dataset, reach out to us on [Discord](https://discord.gg/6xWPKhGDbA).
+```bash
+harbor add org/name-of-task --to my-dataset
+harbor add org/name-of-dataset --to my-dataset
+```
+
+### Add all tasks from a local folder
+
+```bash
+harbor add ./candidate-tasks --scan --to my-dataset
+```
+
+### Optional metric file
+
+If `dataset.toml` does not include `metric.py`:
+
+```bash
+harbor add metric.py --to my-dataset
+```
+
+`metric.py` must be added by filename and must be in the same directory as `dataset.toml`.
+
+## 3) Sync task and file digests (when needed)
+
+`harbor sync` is optional. It is for explicit digest refresh of local tasks in the dataset folder and registry-based task references.
+
+Use it when you need to refresh remote task refs.
+
+```bash
+harbor sync my-dataset --upgrade
+```
+
+For local tasks inside the dataset folder, publish handles digest refresh automatically.
+For local tasks outside the folder, re-add them to refresh digests; `harbor add` upgrades existing task entries by default if the task is already present.
+
+## 4) Publish the dataset
+
+Publish:
+
+```bash
+harbor publish my-dataset
+```
+
+```bash
+harbor publish my-dataset --public -t v1.0 -t release-candidate
+```
+
+By default, publishing adds the `latest` tag to both tasks and datasets.
+`harbor publish` refreshes local digests; use `harbor sync` for non-local/external refs.
+
+For package-level dataset publishing with explicit behavior:
+
+- `-t / --tag`: add one or more tags
+- `--concurrency`: control parallel upload throughput
+- `--no-tasks`: publish only dataset metadata/files
+- `--public`: make package public (default is private)
+
+For details on publishing workflow details, see [Publishing](/docs/datasets/publishing).
+
+## 5) Validate your published dataset
+
+After publishing, evaluate with:
+
+```bash
+harbor run -d "my-org/my-dataset@v1.0" -a "<agent>" -m "<model>"
+```

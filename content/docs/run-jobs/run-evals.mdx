@@ -3,45 +3,50 @@ title: Evals
 description: Running a dataset
 ---
 
-Harbor is built by the creators of Terminal-Bench with evals as a core use case.
-
 ## What is a dataset?
 
-In Harbor, a dataset is a collection of tasks in the [Harbor task format](/docs/tasks). Tasks are agentic environments consisting of an instruction, container environment, and test script.
-
-Datasets can be used to evaluate agents and models, to train models, or to optimize prompts and other aspects of an agent.
+In Harbor, a dataset is a collection of [Harbor tasks](/docs/tasks). A task includes an instruction, environment, and test script. Use datasets to evaluate, train, or tune prompts.
 
 ## Viewing registered benchmarks
 
-Harbor comes with a default registry defined in a [registry.json](https://github.com/laude-institute/harbor/blob/main/registry.json) file stored in the repository root.
+Harbor resolves published datasets from its package registry.
+`harbor run -d "<org>/<dataset>"` uses the configured registry.
 
-To view all available datasets, you can use the following command:
+Use `--registry-path` or `--registry-url` only for legacy `registry.json` setups.
 
-```bash
-harbor datasets list
-```
-
-## Running a benchmark from the registry
-
-To evaluate on Terminal-Bench, you can use the following command:
+To list available datasets:
 
 ```bash
-harbor run -d terminal-bench@2.0 -m "<model>" -a "<agent>"
+harbor dataset list
 ```
 
-Harbor will automatically download the dataset based on the registry definition (which points to version controlled task definitions).
+## Running a benchmark
 
-To evaluate on SWE-Bench Verified:
+Terminal-Bench:
 
 ```bash
-harbor run -d swe-bench-verified@1.0 -m "<model>" -a "<agent>"
+harbor run -d terminal-bench/terminal-bench-2 -m "<model>" -a "<agent>"
 ```
 
-If you leave off the version, Harbor will use the latest version of the dataset.
+Harbor resolves package metadata and downloads task artifacts as needed.
+
+SWE-Bench Verified:
+
+```bash
+harbor run -d swe-bench/swe-bench-verified -m "<model>" -a "<agent>"
+```
+
+Omit the tag to use the latest dataset.
+
+For creation, sync, and publishing workflow:
+
+- [Registering Datasets](/docs/datasets/registering-datasets)
+- [Publishing](/docs/datasets/publishing)
+- [Custom Metrics](/docs/datasets/metrics)
 
 ## Running a local dataset
 
-If you want to evaluate on a local dataset, you can use the following command:
+Run a local dataset with:
 
 ```bash
 harbor run -p "<path/to/dataset>" -m "<model>" -a "<agent>"

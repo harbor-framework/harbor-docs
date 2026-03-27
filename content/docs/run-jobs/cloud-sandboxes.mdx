@@ -12,7 +12,7 @@ Using a cloud sandbox provider shifts command execution to the cloud, making tri
 There are many cloud sandbox providers to choose from. We recommend [Daytona](https://www.daytona.io/), because we have found them to be the most flexible. Other good options are [Modal](https://modal.com/), [E2B](https://e2b.dev/) and [Runloop](https://runloop.ai/).
 
 ```bash
-harbor run -d "<dataset@version>" \
+harbor run -d "<org/name>" \
   -m "<model>" \
   -a "<agent>" \
   -e daytona \
@@ -25,4 +25,4 @@ We run up to 100 trials in parallel on a MacBook Pro with 14 cores.
 
 Daytona supports multi-container deployments. To use multi-container tasks with Daytona, include an `environment/docker-compose.yaml` file in your task definition.
 
-Other cloud sandbox providers (Modal, E2B) do not currently support multi-container environments. For those providers, you will need to use single-container tasks or switch to Daytona or the local Docker environment.
+Other cloud sandbox providers (Modal, E2B, Runloop) do not currently support multi-container environments. For those providers, you will need to use single-container tasks or switch to Daytona or the local Docker environment.

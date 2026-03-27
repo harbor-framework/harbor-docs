@@ -3,61 +3,34 @@ title: Datasets
 description: Running a dataset
 ---
 
-A [Harbor task](/docs/tasks) is an instruction, container environment, and test script. Datasets are collections of tasks used for evals and training.
+A [Harbor task](/docs/tasks) is an instruction, container environment, and test script. A dataset is a collection of tasks for evals and training.
 
-There are two types of datasets:
+Tasks can belong to multiple datasets, so datasets are a good way to create targeted eval groups.
+You can publish public datasets or private datasets; private datasets are only available to members of your organization.
 
-1. **Local datasets** which are datasets that are stored on the local machine.
-2. **Registry datasets** which are datasets that are stored in a git repository and registered in a json file.
+There are two ways to use datasets:
+
+1. **Local datasets**: pass a local directory of tasks.
+2. **Published datasets**: use Harbor package references like `org/name@tag` (for example, `my-org/my-dataset@1.0`).
 
 ## Local datasets
 
-A local dataset is a directory that contains a set of tasks. To evaluate on a local dataset, use the following command:
+A local dataset runs directly from disk:
 
 ```bash
-harbor run -p "<path/to/dataset>" -a "<agent>" -m "<model>" 
+harbor run -p "<path/to/dataset>" -a "<agent>" -m "<model>"
 ```
 
-## Harbor registry
+## Published datasets
 
-Harbor comes with a default registry defined in a [registry.json](https://github.com/laude-institute/harbor/blob/main/registry.json) file stored in the repository root.
-
-Simply use the `--dataset` or `-d` flag to reference a dataset by name and version:
+Run a published dataset with `-d`:
 
 ```bash
-harbor run -d "my-dataset@1.0" -a "<agent>" -m "<model>" 
+harbor run -d "my-org/my-dataset@1.0" -a "<agent>" -m "<model>"
 ```
 
-A dataset has the following structure:
+## Build and publish workflow
 
-```json
-{
-    "name": "my-dataset",
-    "version": "1.0",
-    "description": "A description of the dataset",
-    "tasks": [
-        {
-            "name": "task-1",
-            "git_url": "https://github.com/my-org/my-dataset.git",
-            "git_commit_id": "1234567890",
-            "path": "task-1"
-        },
-        ...
-    ]
-}
-```
-
-Datasets can contain tasks from multiple repositories.
-
-The Harbor registry is currently only intended to house benchmarks and popular training datasets. Consider submitting a PR to add your dataset to the registry to take advantage of Harbor's distribution.
-
-## Custom registry
-
-Sometimes, you may want to create your own registry to store private datasets. You can define your own registry.json file and use the `--registry-path` flag to point to it (or host it at a URL and use the `--registry-url` flag).
-
-```bash
-harbor run -d "my-dataset@1.0" -a "<agent>" -m "<model>" --registry-path "<path/to/registry.json>"
-
-# Or to host it at a URL
-harbor run -d "my-dataset@1.0" -a "<agent>" -m "<model>" --registry-url "<url/to/registry.json>"
-```
+- [Registering Datasets](/docs/datasets/registering-datasets)
+- [Publishing (optional)](/docs/datasets/publishing)
+- [Custom Metrics](/docs/datasets/metrics)

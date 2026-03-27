@@ -9,20 +9,29 @@ import {
 import Link from "next/link";
 
 export default function NewsPage() {
+  const pinnedSlug = "harbor-registry";
+
   const posts = newsSource
     .getPages()
-    .sort(
-      (a, b) =>
+    .sort((a, b) => {
+      const aSlug = a.url.split("/").filter(Boolean).pop();
+      const bSlug = b.url.split("/").filter(Boolean).pop();
+
+      if (aSlug === pinnedSlug && bSlug !== pinnedSlug) return -1;
+      if (bSlug === pinnedSlug && aSlug !== pinnedSlug) return 1;
+
+      return (
         new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
-    );
+      );
+    });
 
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-12 font-mono">
       <h1 className="text-3xl mb-8">News</h1>
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col border-t">
         {posts.map((post) => (
           <Link key={post.url} href={post.url} className="block w-full">
-            <Card className="w-full transition-colors hover:bg-fd-accent shadow-none">
+            <Card className="border-t-0 w-full transition-colors hover:bg-fd-accent shadow-none">
               <CardHeader>
                 <div className="mb-2 flex items-start justify-between gap-4">
                   <CardTitle className="text-xl">
