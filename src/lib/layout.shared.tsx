@@ -13,17 +13,22 @@ export function baseOptions(): BaseLayoutProps {
     links: [
       {
         url: "/docs",
-        text: "Docs",
+        text: "docs",
+        active: "nested-url",
+      },
+      {
+        url: "/news",
+        text: "news",
         active: "nested-url",
       },
       {
         url: "/registry",
-        text: "Registry",
+        text: "registry",
         active: "nested-url",
       },
       {
         url: "https://discord.gg/6xWPKhGDbA",
-        text: "Discord",
+        text: "discord",
         active: "none",
         external: true,
       },

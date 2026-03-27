@@ -129,3 +129,7 @@
 figure.shiki {
   box-shadow: none;
 }
+
+#nd-nav {
+  font-family: var(--font-mono);
+}
