@@ -123,6 +123,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  #nd-nav {
+    font-family: var(--font-mono);
+  }
 }
 
 /* Remove shadow from code blocks */
@@ -130,6 +133,16 @@ figure.shiki {
   box-shadow: none;
 }
 
-#nd-nav {
-  font-family: var(--font-mono);
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(50%);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
