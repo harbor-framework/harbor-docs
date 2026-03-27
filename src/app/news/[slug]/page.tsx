@@ -15,7 +15,7 @@ export default async function NewsPost(
   const MDX = page.data.body;
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
+    <main className="mx-auto max-w-4xl px-4 py-12">
       <article>
         <div className="font-mono">
           <div className="mb-6 flex items-start justify-between gap-4">
