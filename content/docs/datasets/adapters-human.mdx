@@ -6,6 +6,8 @@ description: A concise guide for human readers to create a Harbor adapter for yo
 import { Callout } from 'fumadocs-ui/components/callout';
 import { File, Folder, Files } from 'fumadocs-ui/components/files';
 
+To add a new benchmark or dataset to Harbor, you create an [adapter](https://github.com/laude-institute/harbor/tree/main/adapters) that translates the original benchmark's tasks into Harbor format.
+
 <Callout title="Using an AI agent to build your adapter?">
 AI agents should follow the spec at [Adapter AI Guideline](/docs/datasets/adapters)
 instead of this page. That document contains the complete schema,
@@ -13,17 +15,8 @@ all edge cases, and machine-verifiable examples.
 Do not use the tutorial below as your source of truth.
 </Callout>
 
-Harbor supports running various benchmarks and datasets via a simple, unified interface. SWE-Bench, LiveCodeBench, and more benchmarks are integrated into Harbor, and our team is actively working to adapt additional benchmarks to the framework.
-To add a new benchmark or dataset, you need to create an [adapter](https://github.com/laude-institute/harbor/tree/main/adapters) that translates the original benchmark's tasks into the Harbor format.
-
-We welcome the open source community to contribute adapters for new benchmarks and datasets. If you have a benchmark or a dataset of tasks that you want to adapt (e.g., using Harbor's evaluation harness), please follow the steps below to develop your adapter and get it merged.
-
-<Callout title="We'd love to help you adapt your benchmark!">
-If you are thinking about adapting your benchmark or contributing one from our [Adapter List](https://docs.google.com/spreadsheets/d/1mJbiASPm32DDNzEnV6eDGwpEf3FlMUe5dhkZmFjjSoo/edit?gid=0#gid=0), please join our [Discord](https://discord.com/invite/6xWPKhGDbA) and reach out to [Lin Shi](mailto:ls2282@cornell.edu) from the `#adapters-announcements` channel.
-</Callout>
-
-<Callout title="Need help?">
-Join our [Discord](https://discord.com/invite/6xWPKhGDbA) and reach out in `#adapters-announcements`. Check the [Adapter List](https://docs.google.com/spreadsheets/d/1mJbiASPm32DDNzEnV6eDGwpEf3FlMUe5dhkZmFjjSoo/edit?gid=0#gid=0) for available benchmarks. We cover API costs for parity experiments.
+<Callout title="Need help or want to contribute?">
+Join our [Discord](https://discord.com/invite/6xWPKhGDbA) (`#adapters-announcements`) and reach out to [Lin Shi](mailto:ls2282@cornell.edu). Check the [Adapter List](https://docs.google.com/spreadsheets/d/1mJbiASPm32DDNzEnV6eDGwpEf3FlMUe5dhkZmFjjSoo/edit?gid=0#gid=0) for available benchmarks. We cover API costs for parity experiments.
 </Callout>
 
 ## Quick Start
@@ -33,10 +26,10 @@ Join our [Discord](https://discord.com/invite/6xWPKhGDbA) and reach out in `#ada
 harbor dataset list
 
 # Scaffold a new adapter interactively
-harbor adapters init
+harbor adapter init
 
 # Or with arguments
-harbor adapters init my-adapter --name "My Benchmark"
+harbor adapter init my-adapter --name "My Benchmark"
 ```
 
 ## Steps at a Glance
@@ -57,17 +50,12 @@ harbor adapters init my-adapter --name "My Benchmark"
 
 ## 1. Understand the Original Benchmark
 
-Before coding, study the original benchmark and identify its four key components:
+Before coding, study the original benchmark and identify four key components:
 
-1.  **[Understand the Original Benchmark](#1-understand-the-original-benchmark):** First, you'll analyze the original benchmark to identify the task's four key factors required by Harbor: task instructions, environments, tests, and solutions.
-2.  **[Fork Harbor Repository and Develop Adapter Code](#2-fork-harbor-repository-and-develop-adapter-code):** Fork the Harbor repository and write Python adapter code that translates the original benchmark's tasks into the Harbor format.
-3.  **[Running Harbor Harness and Verify Oracle Solutions](#3-running-harbor-harness-and-verify-oracle-solutions):** Run Harbor harness on your adapter and ensure all oracle solutions pass with 100% reward. Create a WIP PR with a screenshot showing oracle success.
-4.  **[Discuss Parity Plans and Implement Agents](#4-discuss-parity-plans-and-implement-agents):** Reach out to the team to discuss parity experiment plans, then implement the corresponding agents on the original benchmark side or in Harbor, depending on the benchmark setting. This could happen right after you sign up for an adapter and before Step 1 as well, if the benchmark is relatively straightforward.
-5.  **[Run Parity Experiments](#5-run-parity-experiments):** Run parity experiments to verify your adapter's performance against the original benchmark baseline results.
-6.  **[Record Parity Results](#6-record-parity-results):** Formally document the performance comparison in `parity_experiment.json`.
-7.  **[Upload Parity Results](#7-upload-parity-results):** Upload parity and oracle results to the HuggingFace dataset repository.
-8.  **[Register the Dataset](#8-register-the-dataset):** Prepare your dataset for the [Harbor Registry](https://registry.harborframework.com) using `harbor init` and `dataset.toml`, then coordinate with the Harbor team to publish.
-9.  **[Document and Submit](#9-document-and-submit):** Document your adapter's usage, parity results, and comprehensive adaptation details in a `README.md`, then submit your work through a pull request.
+1. **Task Instructions** — How are tasks described? What do agents need?
+2. **Environments** — What setup is required? (Docker, dependencies, file structures)
+3. **Tests** — How are solutions evaluated? (unit tests, LLM-as-a-Judge, etc.)
+4. **Solutions** — What are the oracle/reference solutions?
 
 ## 2. Write the Adapter Code
 
@@ -137,7 +125,7 @@ Run your adapter with the oracle agent and confirm **100% reward on all tasks**.
 
 ```bash
 # Single task
-harbor trials start -p datasets/<adapter-name>/<task-id>
+harbor trial start -p datasets/<adapter-name>/<task-id>
 
 # Entire dataset
 harbor run -p datasets/<adapter-name>
@@ -223,7 +211,7 @@ Also include a summary table in your README:
 
 ## 7. Upload Results
 
-Upload parity and oracle results to the [HuggingFace parity-experiments dataset](https://huggingface.co/datasets/harborframework/parity-experiments). The [parity upload skill](https://github.com/harbor-framework/harbor/pull/1286) can automate this workflow.
+Upload parity and oracle results to the [HuggingFace parity-experiments dataset](https://huggingface.co/datasets/harborframework/parity-experiments). The [parity upload skill](https://github.com/harbor-framework/harbor/tree/main/skills/upload-parity-experiments) can automate this workflow.
 
 ```
 adapters/<adapter_name>/
@@ -314,7 +302,7 @@ If you're converting a Terminal-Bench adapter, here are the key differences:
 | Verification | Exit code (pytest) | Reward file: `/logs/verifier/reward.txt` |
 | Output dir | `tasks/` | `datasets/` |
 | Registry | Dataset-level `dataset_path` | `dataset.toml` + `harbor init` publishing workflow |
-| CLI | `tb run --dataset` | `harbor jobs start -d` / `harbor runs start -p` |
+| CLI | `tb run --dataset` | `harbor run -d` / `harbor run -t` /`harbor run -p` |
 | Metrics | Binary pass/fail | Float rewards, multiple metrics |
 
 **Important:** If Terminal-Bench used a tweaked metric, re-implement to support the **original** benchmark metrics — Harbor supports multiple metrics as rewards.
