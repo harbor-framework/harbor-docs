@@ -24,16 +24,16 @@ See [this section](#translating-terminal-bench-adapters-to-harbor) to learn abou
 
 ```bash
 # List available datasets
-harbor datasets list
+harbor dataset list
 
 # Start the interactive wizard to create a new adapter
-harbor adapters init
+harbor adapter init
 
 # Initialize with specific arguments (skipping some prompts)
-harbor adapters init my-adapter --name "My Benchmark"
+harbor adapter init my-adapter --name "My Benchmark"
 ```
 
-Use the above commands to view our supported datasets and start creating your new ones. The `harbor adapters init` command will create starter code and template files.
+Use the above commands to view our supported datasets and start creating your new ones. The `harbor adapter init` command will create starter code and template files.
 
 For more details about what adapters are and how we ensure equivalance between the original benchmark and its harbor adapter, please continue reading.
 
@@ -194,22 +194,22 @@ There are several ways to run Harbor harness on your adapter:
 **Option 1: Using individual trials (for testing single tasks)**
 ```bash
 # Run oracle agent on a single task
-uv run harbor trials start -p datasets/<your-adapter-name>/<task-id>
+harbor trial start -p datasets/<your-adapter-name>/<task-id>
 
 # Run with specific agent and model
-uv run harbor trials start -p datasets/<your-adapter-name>/<task-id> -a <agent-name> -m <model-name>
+harbor trial start -p datasets/<your-adapter-name>/<task-id> -a <agent-name> -m <model-name>
 ```
 
 **Option 2: Using jobs with local dataset path**
 ```bash
 # Run on entire local dataset
-uv run harbor jobs start -p datasets/<your-adapter-name> -a <agent-name> -m <model-name>
+harbor run -p datasets/<your-adapter-name> -a <agent-name> -m <model-name>
 ```
 
 **Option 3: Using jobs with configuration file**. Refer to [harbor/examples/configs](https://github.com/laude-institute/harbor/tree/main/examples/configs) for configuration examples. It's highly recommended to write a reference config file for your adapter to ensure reproducibility.
 ```bash
 # Create a job config YAML (see harbor/examples/configs/ for examples)
-uv run harbor jobs start -c adapters/<your-adapter-name>/<config>.yaml -a <agent-name> -m <model-name>
+harbor run -c adapters/<your-adapter-name>/<config>.yaml -a <agent-name> -m <model-name>
 ```
 
 **Option 4: Using registry dataset (after [publishing](#8-register-the-dataset))**. Registry testing is only available after the dataset has been published, which ensures the correct data structure.
@@ -229,7 +229,7 @@ You should include instructions for running in multiple ways in the `README.md` 
 Before proceeding further, you must ensure that all oracle solutions pass with a 100% reward. Run the oracle agent on your entire dataset:
 
 ```bash
-uv run harbor jobs start -p datasets/<your-adapter-name>
+harbor run -p datasets/<your-adapter-name>
 ```
 
 Once you've verified that all oracle solutions pass, you can create a Work-In-Progress (WIP) pull request to the Harbor repository:
@@ -238,6 +238,16 @@ Once you've verified that all oracle solutions pass, you can create a Work-In-Pr
 2. **Include a screenshot:** Paste a screenshot of your terminal showing the oracle solution 100% pass results. This demonstrates that your adapter correctly generates tasks and that the oracle solutions work as expected.
 
 This WIP PR allows the team to review your adapter structure early and provide feedback before you proceed with parity experiments.
+
+<Callout title="Broken Oracles in the Original Benchmark">
+If the original benchmark has tasks with broken or flawed oracle solutions, **do not attempt to fix them on the Harbor side**. Instead:
+
+1. **Document** which tasks have oracle issues in your adapter's README.
+2. **File bugs** to the upstream benchmark repository so the original maintainers can address them.
+3. **Exclude** those tasks from your adapter if they cannot be reliably verified, and note the exclusion in your README.
+
+This ensures Harbor adapters faithfully reflect the original benchmark rather than silently diverging.
+</Callout>
 
 ### 4. Discuss Parity Plans and Implement Agents
 
@@ -285,7 +295,7 @@ This approach has two important implications:
   uv run run_adapter.py --output-dir /path/to/output
   ```
 
-2. **Registry Version Naming:** When uploading the dataset to the registry, use the version name `"parity"` instead of `"1.0"` or `"2.0"` to avoid confusion. This allows users to run parity reproduction using `-d <adapter_name>@parity` while keeping the full dataset available separately.
+2. **Registry Version Naming:** When publishing the dataset to the [Harbor Registry](https://registry.harborframework.com), use the version name `"parity"` instead of `"1.0"` or `"2.0"` in your `dataset.toml` to avoid confusion. This allows users to run parity reproduction using `-d <adapter_name>@parity` while keeping the full dataset available separately.
 
 
 </Callout>
@@ -357,6 +367,10 @@ Then include the following links:
 ### 7. Upload Parity Results
 
 After recording your parity results, you need to upload both the parity experiment results and oracle results to the [Harbor Parity Experiments HuggingFace dataset](https://huggingface.co/datasets/harborframework/parity-experiments). This allows the community to track adapter quality and helps estimate costs for each adapter on diverse agents and models.
+
+<Callout title="Parity Upload Skill">
+Uploading to the HuggingFace parity dataset can be tricky (large repos, LFS requirements, HF-specific refs). The [parity upload skill](https://github.com/harbor-framework/harbor/pull/1286) automates this workflow — it handles sparse checkouts, LFS tracking, and pushing to the correct HF PR ref. Use it to avoid common upload pitfalls.
+</Callout>
 
 Follow the README instructions in the HuggingFace dataset repository to upload your results. The dataset expects results to be organized in the following format:
 
@@ -468,7 +482,7 @@ Next, you need to write a `harbor/adapters/{adapter_name}/adapter_metadata.json`
         "split": <original-benchmark-split>, // if there's no split or subset name, use "full"; if the adapter code works for all splits and we ran parity collectively, we can just write "full" without needing to split them one by one; however, if different splits are registered / validated in different ways, we need to split them out.
         "adapted_benchmark_size": <number-of-tasks-convertible-in-the-adapter>, // this may be different than the size of the original benchmark's corresponding split, because we might exclude certain tasks for sufficient reasons documented in the README.
         "parity_benchmark_size": <number-of-tasks-used-for-parity>, // same as adapted_benchmark_size if we ran parity on full set
-        "parity_sampling_rate": adapted_benchmark_size / parity_benchmark_size
+        "parity_sampling_rate": parity_benchmark_size / adapted_benchmark_size
         "registry_benchmark_size": <number-of-tasks-in-the-registry> // we will match this number with adapted_benchmark_size or parity_benchmark_size to determine whether the full set or parity set is being registered. Please use the exact match integer-value count here.
         "added_agents": [custom_agent1, custom_agent2], // custom agents added by the adapter to align with the original benchmark.
         "parity_matching_agents": [agent_1@version+model, agent_1@version+model, ...] // agents (including custom ones) used for parity experiment AND achieved comparable scores to original benchmark.
@@ -521,7 +535,7 @@ The following table summarizes the main differences between Terminal-Bench and H
 | **Docker Compose** | `docker-compose.yaml` in task root | Not typically used per-task |
 | **Default Output Directory** | `tasks/<adapter-name>` | `datasets/<adapter-name>` |
 | **Registry Format** | Dataset-level with `dataset_path` | `dataset.toml` + `harbor init` publishing workflow |
-| **CLI Commands** | `tb run --dataset` / `tb run --dataset-path` | `harbor jobs start -d` / `harbor runs start -p` |
+| **CLI Commands** | `tb run --dataset` / `tb run --dataset-path` | `harbor run -d` / `harbor run -t` / `harbor run -p` |
 | **Metrics** | Resolved rate (binary pass/fail per task) | Rewards that support multiple metrics and float-type values |
 
 **IMPORTANT:** If the Terminal-Bench adapter used a tweaked metric (e.g., threshold-based scoring, ignoring certain metrics), then you'll need to re-implement the adapter for Harbor to support the **original** metrics used by the benchmark, as Harbor now supports multiple metrics as rewards.
@@ -655,7 +669,7 @@ fi
 
 #### Step 5: Update Registry Format
 
-Terminal-Bench uses a `registry.json` file with dataset-level entries. Harbor uses the [Harbor Registry](https://registry.harborframework.com) with `dataset.toml` configuration and the `harbor init` workflow.
+Terminal-Bench uses a `registry.json` file with dataset-level entries. Harbor uses the [Harbor Registry](https://registry.harborframework.com) with `dataset.toml` configuration and the `harbor publish` workflow.
 
 **Terminal-Bench registry.json:**
 ```json

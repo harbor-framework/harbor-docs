@@ -148,6 +148,10 @@ harbor run -c adapters/<adapter-name>/<config>.yaml -a <agent> -m <model>
 
 Once oracle passes, create a **WIP PR** titled `[WIP] Adapter: {adapter_name}` with a screenshot of the 100% pass results.
 
+<Callout title="Broken oracles in the original benchmark?">
+Don't fix them on the Harbor side. Document the affected tasks, file bugs to the upstream benchmark, and exclude those tasks if they can't be reliably verified. This keeps Harbor adapters faithful to the original.
+</Callout>
+
 ## 4. Plan Parity & Implement Agents
 
 Reach out to the team (e.g., **Lin Shi**) on [Discord](https://discord.com/invite/6xWPKhGDbA) **before** running parity experiments. They will help decide:
@@ -219,7 +223,7 @@ Also include a summary table in your README:
 
 ## 7. Upload Results
 
-Upload parity and oracle results to the [HuggingFace parity-experiments dataset](https://huggingface.co/datasets/harborframework/parity-experiments):
+Upload parity and oracle results to the [HuggingFace parity-experiments dataset](https://huggingface.co/datasets/harborframework/parity-experiments). The [parity upload skill](https://github.com/harbor-framework/harbor/pull/1286) can automate this workflow.
 
 ```
 adapters/<adapter_name>/
