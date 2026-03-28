@@ -129,8 +129,8 @@ Develop your adapter under `adapters/{adapter-name}/`. Refer to existing adapter
 | Single task | `harbor trial start -p datasets/<adapter-name>/<task-id> -a <agent> -m <model>` | Testing individual tasks |
 | Entire dataset | `harbor run -p datasets/<adapter-name> -a <agent> -m <model>` | Full oracle verification |
 | Config file | `harbor run -c adapters/<adapter-name>/<config>.yaml -a <agent> -m <model>` | Reproducible runs (see [example configs](https://github.com/laude-institute/harbor/tree/main/examples/configs)) |
-| Registry: single task | `harbor run -t <adapter-name>/<task-id> -a <agent> -m <model>` | Post-publish single task |
-| Registry: full dataset | `harbor run -d <adapter-name> -a <agent> -m <model>` | Post-publish full dataset (after [Step 8](#step-8-register-the-dataset)) |
+| Registry: single task | `harbor run -t <organization-name>/<task-id> -a <agent> -m <model>` | Post-publish single task |
+| Registry: full dataset | `harbor run -d <organization-name>/<adapter-name> -a <agent> -m <model>` | Post-publish full dataset (after [Step 8](#step-8-register-the-dataset)) |
 
 Write a reference config YAML for your adapter to ensure reproducibility.
 
@@ -338,10 +338,10 @@ Include tasks directory and `dataset.toml` in your adapter PR. The Harbor team p
 ### 8.4 Verify post-publish
 
 ```bash
-harbor run -d <your-adapter-name>
+harbor run -d <organization-name>/<adapter-name>
 ```
 
-**Step complete when:** Dataset is published to the registry, `harbor run -d <your-adapter-name>` passes oracle tests, and the PR to `harbor-datasets` is merged.
+**Step complete when:** Dataset is published to the registry, `harbor run -d <organization-name>/<adapter-name>` passes oracle tests, and the PR to `harbor-datasets` is merged.
 
 ---
 
