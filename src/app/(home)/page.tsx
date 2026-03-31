@@ -26,7 +26,7 @@ export default function HomePage() {
       </Link>
       <main className="flex flex-1 flex-col justify-center space-y-12 max-w-6xl mx-auto px-4 py-6 sm:pt-16">
         <div className="flex flex-col items-center">
-          <h1 className="max-w-5xl text-center text-5xl leading-tight sm:text-6xl lg:text-7xl tracking-tighter font-code font-medium mb-12">
+          <h1 className="max-w-5xl text-center text-5xl leading-tight sm:text-6xl tracking-tighter font-code font-medium mb-12">
             harbor: evaluate agents in sandboxed environments
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl text-center mb-12">
